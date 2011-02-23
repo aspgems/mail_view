@@ -20,22 +20,36 @@ class MailView
     end
   end
 
+  cattr_accessor :viewers, :instance_writer => false, :instance_reader => false
+
+  def self.inherited(base)
+    self.viewers ||= []
+    self.viewers << base
+  end
+
   def call(env)
+    load_viewers
+
     path_info = env["PATH_INFO"]
 
     if path_info == "" || path_info == "/"
-      links = self.actions.inject({}) { |h, action|
-        h[action] = "#{env["SCRIPT_NAME"]}/#{action}"
-        h
-      }
+      links = {}
+      MailView.viewers.each do |viewer|
+        viewer.actions.inject(links) { |h, action|
+          h["#{viewer.name.underscore}.#{action}"] = "#{env["SCRIPT_NAME"]}/#{viewer.name.underscore}/#{action}"
+          h
+        }
+      end
 
       ok index_template.render(Object.new, :links => links)
-    elsif path_info =~ /([\w_]+)(\.\w+)?$/
-      name   = $1
-      format = $2 || ".html"
+    elsif path_info =~ /((?:[\w_]+\/)+)([\w_]+)(\.\w+)?$/
+      viewer_name = $1
+      viewer_klass = viewer_name.split("/").join("/").classify.constantize
+      name   = $2
+      format = $3 || ".html"
 
-      if actions.include?(name)
-        ok render_mail(name, send(name), format)
+      if viewer_klass.actions.include?(name)
+        ok render_mail(name, viewer_klass.new.send(name), format)
       else
         not_found
       end
@@ -45,6 +59,17 @@ class MailView
   end
 
   protected
+    def load_viewers
+      Dir[Rails.root.join('app', 'mailers', '**', '*.rb')].each do |file|
+        "#{File.basename(file,'.rb').classify}::Preview".constantize rescue nil
+      end
+    end
+
+    def self.actions
+      public_instance_methods(false).map(&:to_s) - ['call']
+    end
+
+    # TODO not used in only one route
     def actions
       public_methods(false).map(&:to_s) - ['call']
     end
