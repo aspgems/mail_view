@@ -3,11 +3,19 @@ MailView -- Visual email testing
 
 Preview plain text and html mail templates in your browser without redelivering it every time you make a change.
 
+This fork
+---------
+
+If you have several mailer classes you needed to write those classes inside the routes.rb, but with this fork you don't
+ need to write them the library do it for you (We save the classes that are descendant of MailView)
+
+
 Usage
 -----
 
 Since most emails do something interesting with database data, you'll need to write some scenarios to load messages with fake data. Its similar to writing mailer unit tests but you see a visual representation of the output instead.
 
+```ruby
     class Notifier < ActionMailer::Base
       def invitation(inviter, invitee)
         # ...
@@ -34,6 +42,7 @@ Since most emails do something interesting with database data, you'll need to wr
         end
       end
     end
+```
 
 Methods must return a [Mail][1] or [TMail][2] object. Using ActionMailer, call `Notifier.create_action_name(args)` to return a compatible TMail object. Now on ActionMailer 3.x, `Notifier.action_name(args)` will return a Mail object.
 
@@ -42,15 +51,19 @@ Routing
 
 A mini router middleware is bundled for Rails 2.x support.
 
+```ruby
     # config/environments/development.rb
     config.middleware.use MailView::Mapper, Notifier::Preview
+```
 
 For Rails³ you can map the app inline in your routes config.
 
+```ruby
     # config/routes.rb
     if Rails.env.development?
       mount Notifier::Preview => 'mail_view'
     end
+```
 
 Now just load up `http://localhost:3000/mail_view`.
 
