@@ -41,12 +41,10 @@ class MailView
         }
       end
 
-      ok index_template.render(Object.new, :links => links)
+      ok index_template.render(Object.new, :links => links.sort)
     elsif path_info =~ /((?:[\w_]+\/)+)([\w_]+)(\.\w+)?$/
-      viewer_name = $1
+      viewer_name, name, format = $1, $2, ($3 || ".html")
       viewer_klass = viewer_name.split("/").join("/").classify.constantize
-      name   = $2
-      format = $3 || ".html"
 
       if viewer_klass.actions.include?(name)
         ok render_mail(name, viewer_klass.new.send(name), format)
@@ -92,7 +90,7 @@ class MailView
 
   private
     def ok(body)
-      [200, {"Content-Type" => "text/html"}, [body]]
+      [200, {"Content-Type" => "text/html;charset=utf-8"}, [body]]
     end
 
     def not_found(pass = false)
