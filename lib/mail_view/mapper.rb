@@ -1,6 +1,6 @@
 class MailView
   class Mapper
-    def initialize(app, controller, prefix = "/mail_view")
+    def initialize(app, controller = MailView, prefix = "/mail_view")
       @app        = app
       @controller = controller.respond_to?(:name) ? controller.name : controller.to_s
       @prefix     = Regexp.compile("^#{prefix}")
