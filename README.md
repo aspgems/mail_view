@@ -26,7 +26,7 @@ Rails 2
 script/plugin install git://github.com/aspgems/mail_view.git
 ```
 
-or add the following line to Gemfile:
+add the following line to Gemfile:
 
 ```ruby
 gem 'tilt'
