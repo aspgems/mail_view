@@ -9,6 +9,30 @@ This fork
 If you have several mailer classes you needed to write those classes inside the routes.rb, but with this fork you don't
  need to write them the library do it for you (We save the classes that are descendant of MailView)
 
+Installation
+------------
+
+Install as a plugin:
+
+Rails 3
+
+```shell
+rails plugin install git://github.com/aspgems/mail_view.git
+```
+
+Rails 2
+
+```shell
+script/plugin install git://github.com/aspgems/mail_view.git
+```
+
+or add the following line to Gemfile:
+
+```ruby
+gem 'tilt'
+```
+and run `bundle install` from your shell.
+
 
 Usage
 -----
@@ -53,16 +77,14 @@ A mini router middleware is bundled for Rails 2.x support.
 
 ```ruby
     # config/environments/development.rb
-    config.middleware.use MailView::Mapper, Notifier::Preview
+    config.middleware.use MailView::Mapper
 ```
 
 For Rails³ you can map the app inline in your routes config.
 
 ```ruby
     # config/routes.rb
-    if Rails.env.development?
-      mount Notifier::Preview => 'mail_view'
-    end
+    mount MailView => 'mail_view' if Rails.env.development?
 ```
 
 Now just load up `http://localhost:3000/mail_view`.
